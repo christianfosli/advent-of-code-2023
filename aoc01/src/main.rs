@@ -6,7 +6,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let part_1 = input
         .lines()
         .filter_map(find_calibration_value_1)
-        .sum::<usize>();
+        .sum::<u32>();
     dbg!(&part_1);
 
     let part_2 = input
@@ -18,15 +18,15 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn find_calibration_value_1(s: &str) -> Option<usize> {
-    let first_digit = s.chars().find(|c| c.is_ascii_digit())?;
-    let last_digit = s.chars().rev().find(|c| c.is_ascii_digit())?;
+fn find_calibration_value_1(s: &str) -> Option<u32> {
+    let first_digit = s.chars().find(char::is_ascii_digit)?;
+    let last_digit = s.chars().rev().find(char::is_ascii_digit)?;
 
     Some(
         [first_digit, last_digit]
             .into_iter()
             .collect::<String>()
-            .parse::<usize>()
+            .parse::<u32>()
             .unwrap(),
     )
 }
@@ -38,8 +38,8 @@ fn find_calibration_value_2(s: &str) -> Option<u32> {
 }
 
 fn find_num(s: &str, backwards: bool) -> Option<u32> {
-    static NUMBERS: &[&str] = &[
-        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+    static DIGITS: &[&str] = &[
+        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
     ];
 
     let letters: Box<dyn Iterator<Item = _>> = if backwards {
@@ -48,20 +48,20 @@ fn find_num(s: &str, backwards: bool) -> Option<u32> {
         Box::new(s.chars())
     };
 
-    let mut maybe_num = Vec::new();
+    let mut iterated_chars = Vec::new();
     for c in letters {
         if c.is_ascii_digit() {
             return c.to_digit(10);
         }
 
-        maybe_num.push(c);
-        let maybe_num = if backwards {
-            maybe_num.iter().rev().collect::<String>()
+        iterated_chars.push(c);
+        let maybe_digit = if backwards {
+            iterated_chars.iter().rev().collect::<String>()
         } else {
-            maybe_num.iter().collect::<String>()
+            iterated_chars.iter().collect::<String>()
         };
-        if let Some(&n) = NUMBERS.iter().find(|&n| maybe_num.contains(n)) {
-            return Some(match n {
+        if let Some(&digit) = DIGITS.iter().find(|&n| maybe_digit.contains(n)) {
+            return Some(match digit {
                 "one" => 1,
                 "two" => 2,
                 "three" => 3,
