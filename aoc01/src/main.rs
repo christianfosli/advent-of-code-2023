@@ -21,14 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 fn find_calibration_value_1(s: &str) -> Option<u32> {
     let first_digit = s.chars().find(char::is_ascii_digit)?;
     let last_digit = s.chars().rev().find(char::is_ascii_digit)?;
-
-    Some(
-        [first_digit, last_digit]
-            .into_iter()
-            .collect::<String>()
-            .parse::<u32>()
-            .unwrap(),
-    )
+    Some(format!("{first_digit}{last_digit}").parse::<u32>().unwrap())
 }
 
 fn find_calibration_value_2(s: &str) -> Option<u32> {
