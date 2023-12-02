@@ -7,7 +7,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let input = fs::read_to_string("input.txt")?;
     let p1 = sum_valid_games(
         &input,
-        &Cubes {
+        Cubes {
             red: 12,
             green: 13,
             blue: 14,
@@ -19,7 +19,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn sum_valid_games(s: &str, actual: &Cubes) -> usize {
+fn sum_valid_games(s: &str, actual: Cubes) -> usize {
     s.lines()
         .map(|l| l.parse::<Game>().unwrap())
         .filter(|g| {
@@ -30,7 +30,7 @@ fn sum_valid_games(s: &str, actual: &Cubes) -> usize {
                     && r.sum() <= actual.sum()
             })
         })
-        .map(|g| g.id as usize)
+        .map(|g| g.id)
         .sum()
 }
 
@@ -65,11 +65,11 @@ pub struct Cubes {
 }
 
 impl Cubes {
-    fn sum(&self) -> u8 {
+    fn sum(self) -> u8 {
         self.red + self.green + self.blue
     }
 
-    fn power(&self) -> usize {
+    fn power(self) -> usize {
         self.red as usize * self.green as usize * self.blue as usize
     }
 }
@@ -90,16 +90,13 @@ impl FromStr for Game {
                 .map(|rev| Cubes {
                     red: RED_RE
                         .captures(rev)
-                        .map(|caps| caps[1].parse::<u8>().unwrap())
-                        .unwrap_or(0),
+                        .map_or(0, |caps| caps[1].parse::<u8>().unwrap()),
                     green: GREEN_RE
                         .captures(rev)
-                        .map(|caps| caps[1].parse::<u8>().unwrap())
-                        .unwrap_or(0),
+                        .map_or(0, |caps| caps[1].parse::<u8>().unwrap()),
                     blue: BLUE_RE
                         .captures(rev)
-                        .map(|caps| caps[1].parse::<u8>().unwrap())
-                        .unwrap_or(0),
+                        .map_or(0, |caps| caps[1].parse::<u8>().unwrap()),
                 })
                 .collect::<Vec<_>>();
 
@@ -125,7 +122,7 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green";
             8,
             sum_valid_games(
                 TEST_GAMES,
-                &Cubes {
+                Cubes {
                     red: 12,
                     green: 13,
                     blue: 14
