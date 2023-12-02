@@ -1,24 +1,26 @@
-use std::{error::Error, fs, str::FromStr};
+use std::{cmp, error::Error, fs, str::FromStr};
 
 use once_cell::sync::Lazy;
 use regex::Regex;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let input = fs::read_to_string("input.txt")?;
-    let part_1 = sum_valid_games(
+    let p1 = sum_valid_games(
         &input,
         &Cubes {
             red: 12,
             green: 13,
             blue: 14,
         },
-    )?;
-    dbg!(part_1);
+    );
+    println!("part 1: {p1}");
+    let p2 = sum_power_of_smallest_valid_cubes(&input);
+    println!("part 2: {p2}");
     Ok(())
 }
 
-fn sum_valid_games(s: &str, actual: &Cubes) -> Result<usize, Box<dyn Error>> {
-    Ok(s.lines()
+fn sum_valid_games(s: &str, actual: &Cubes) -> usize {
+    s.lines()
         .map(|l| l.parse::<Game>().unwrap())
         .filter(|g| {
             g.reveals.iter().all(|r| {
@@ -29,7 +31,24 @@ fn sum_valid_games(s: &str, actual: &Cubes) -> Result<usize, Box<dyn Error>> {
             })
         })
         .map(|g| g.id as usize)
-        .sum())
+        .sum()
+}
+
+fn sum_power_of_smallest_valid_cubes(s: &str) -> usize {
+    s.lines()
+        .map(|l| l.parse::<Game>().unwrap())
+        .map(|g| {
+            g.reveals
+                .into_iter()
+                .reduce(|acc, e| Cubes {
+                    red: cmp::max(e.red, acc.red),
+                    green: cmp::max(e.green, acc.green),
+                    blue: cmp::max(e.blue, acc.blue),
+                })
+                .unwrap()
+                .power()
+        })
+        .sum()
 }
 
 #[derive(Debug, Clone)]
@@ -48,6 +67,10 @@ pub struct Cubes {
 impl Cubes {
     fn sum(&self) -> u8 {
         self.red + self.green + self.blue
+    }
+
+    fn power(&self) -> usize {
+        self.red as usize * self.green as usize * self.blue as usize
     }
 }
 
@@ -108,7 +131,11 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green";
                     blue: 14
                 }
             )
-            .unwrap()
         );
+    }
+
+    #[test]
+    pub fn it_works_2() {
+        assert_eq!(2286, sum_power_of_smallest_valid_cubes(TEST_GAMES));
     }
 }
