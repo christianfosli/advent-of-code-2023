@@ -12,10 +12,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 fn steps_until_zzz(s: &str) -> Result<usize, Box<dyn Error>> {
     let map_item_re = Regex::new(r"(?<key>\w\w\w) = \((?<left>\w\w\w), (?<right>\w\w\w)\)")?;
 
-    let (lr, nodes_str) = s.split("\n\n").next_tuple().ok_or("invalid format")?;
+    let (lr, nodes) = s.split("\n\n").next_tuple().ok_or("invalid format")?;
     let lr = lr.chars().collect::<Vec<_>>();
 
-    let nodes = nodes_str
+    let nodes = nodes
         .lines()
         .map(|line| {
             if let Some(caps) = map_item_re.captures(line) {
@@ -28,7 +28,7 @@ fn steps_until_zzz(s: &str) -> Result<usize, Box<dyn Error>> {
         })
         .collect::<Result<HashMap<_, _>, _>>()?;
 
-    let mut current_node = nodes_str.chars().take(3).collect::<String>();
+    let mut current_node = "AAA".to_owned();
     let mut steps = 0;
 
     while &current_node != "ZZZ" {
