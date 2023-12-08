@@ -35,13 +35,10 @@ fn steps_until_zzz(s: &str) -> Result<usize, Box<dyn Error>> {
         let dir = lr[steps % lr.len()];
         current_node = nodes
             .get(&current_node)
-            .map(|(left, right)| {
-                // println!("{current_node}=({left},{right}).\t{dir}");
-                match dir {
-                    'L' => left.clone(),
-                    'R' => right.clone(),
-                    _ => panic!("LR contained unexpected char {}", dir),
-                }
+            .map(|(left, right)| match dir {
+                'L' => left.clone(),
+                'R' => right.clone(),
+                _ => panic!("LR contained unexpected char {dir}"),
             })
             .ok_or("current node is missing in nodes map")?;
         steps += 1;
