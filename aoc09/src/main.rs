@@ -5,8 +5,13 @@ use itertools::Itertools;
 fn main() -> Result<(), Box<dyn Error>> {
     let input = fs::read_to_string("input.txt")?;
     let histories = parse(&input)?;
+
     let part_1 = histories.iter().map(|h| predict_next(h)).sum::<isize>();
     println!("part 1: {part_1}");
+
+    let part_2 = histories.iter().map(|h| predict_first(h)).sum::<isize>();
+    println!("part 2: {part_2}");
+
     Ok(())
 }
 
@@ -20,7 +25,7 @@ fn parse(s: &str) -> Result<Vec<Vec<isize>>, ParseIntError> {
         .collect::<Result<Vec<_>, _>>()
 }
 
-fn predict_next(history: &[isize]) -> isize {
+fn extrapolate(history: &[isize]) -> Vec<Vec<isize>> {
     let mut extrapolation = Vec::<Vec<isize>>::new();
     let mut extrapolation_done = false;
     extrapolation.push(history.to_vec());
@@ -34,17 +39,32 @@ fn predict_next(history: &[isize]) -> isize {
             .collect::<Vec<_>>();
 
         if steps.iter().all(|&dx| dx == 0) {
-            extrapolation_done = true
+            extrapolation_done = true;
         }
 
         extrapolation.push(steps);
     }
+    extrapolation
+}
 
+fn predict_next(history: &[isize]) -> isize {
+    let extrapolation = extrapolate(history);
     extrapolation
         .into_iter()
         .rev()
         .map(|seq| *seq.last().unwrap())
         .reduce(|val_below, val_left| val_left + val_below)
+        .unwrap()
+}
+
+fn predict_first(history: &[isize]) -> isize {
+    let extrapolation = extrapolate(history);
+
+    extrapolation
+        .into_iter()
+        .rev()
+        .map(|seq| *seq.first().unwrap())
+        .reduce(|val_below, val_right| val_right - val_below)
         .unwrap()
 }
 
@@ -60,5 +80,11 @@ mod tests {
     fn it_works_1() {
         let histories = parse(TEST_REPORT).unwrap();
         assert_eq!(114isize, histories.iter().map(|h| predict_next(h)).sum())
+    }
+
+    #[test]
+    fn it_works_2() {
+        let histories = parse(TEST_REPORT).unwrap();
+        assert_eq!(2isize, histories.iter().map(|h| predict_first(h)).sum())
     }
 }
